@@ -281,4 +281,4 @@ __pycache__/
 /dataSources.local.xml
 
 #Removing .idea Folder
-/.idea/
+.idea/
