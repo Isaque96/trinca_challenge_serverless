@@ -1,22 +1,23 @@
 ﻿using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Domain.Entities;
 
 public class Churras
 {
     public Churras() { }
-
+    
     public Churras(string reason, string status, DateTime date, bool isTrincasPaying)
     {
-        Id = Guid.NewGuid();
+        Id = Guid.NewGuid().ToString();
         Reason = reason;
         Status = status;
         Date = date;
         IsTrincasPaying = isTrincasPaying;
     }
 
-    [JsonPropertyName("id")] 
-    public Guid Id { get; set; }
+    [JsonProperty("id")]
+    public string Id { get; set; }
     
     [JsonPropertyName("reason")]
     public string Reason { get; set; }

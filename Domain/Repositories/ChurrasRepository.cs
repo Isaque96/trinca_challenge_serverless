@@ -1,31 +1,91 @@
-﻿using Domain.Entities;
+﻿using System.Net;
+using Domain.Abstractions;
+using Domain.Database;
+using Domain.Entities;
+using Domain.Models.Responses;
+using Domain.Utils;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Functions.Worker.Http;
 
 namespace Domain.Repositories;
 
-public class ChurrasRepository : IChurrasRepository
+public class ChurrasRepository : PaginationAbstraction, IChurrasRepository
 {
-    public Task<IEnumerable<Churras>> GetAllAsync()
+    private readonly Container _churras;
+    
+    public ChurrasRepository(CosmosConn cosmos)
     {
-        throw new NotImplementedException();
+        _churras = cosmos.GetContainer("Churras");
     }
 
-    public Task<Churras> GetByIdAsync(Churras entity)
+    public Task<PaginatedResponse<Churras>> GetPaginatedAsync(HttpRequestData? req, int pageNumber = 1, int pageSize = 50)
     {
-        throw new NotImplementedException();
+        if (req == null)
+            throw new ArgumentException("You should send the request!");
+
+        var response = GetPaginatedResponse<Churras>(_churras, pageSize, pageNumber, req);
+        
+        return Task.FromResult(response);
     }
 
-    public Task<Churras> AddAsync(Churras entity)
+    public async Task<Churras> GetByIdAsync(string id)
     {
-        throw new NotImplementedException();
+        Churras churras;
+        try
+        {
+            churras = await _churras.ReadItemAsync<Churras>(
+                id, new PartitionKey(id)
+            );
+        }
+        catch (Exception e)
+        {
+            // TODO: Implement Logs
+            Console.WriteLine(e);
+            churras = null!;
+        }
+
+        return churras;
     }
 
-    public Task<Churras> UpdateAsync(Churras entity)
+    public async Task<Churras> AddAsync(Churras entity)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrEmpty(entity.Id))
+            entity.Id = Guid.NewGuid().ToString();
+        
+        Churras churras;
+        try
+        {
+            churras = await _churras.CreateItemAsync(entity, new PartitionKey(entity.Id));
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex);
+            churras = null!;
+        }
+
+        return churras;
     }
 
-    public Task<int> RemoveAsync(Churras entity)
+    public async Task<Churras> UpdateAsync(Churras entity)
     {
-        throw new NotImplementedException();
+        var item = await _churras.ReadItemAsync<Churras>(entity.Id, new PartitionKey(entity.Id));
+        var churras = item.Resource;
+
+        var churrasToUpdate = Util.UpdateLogic(entity, churras);
+
+        item = await _churras.ReplaceItemAsync(
+            churrasToUpdate,
+            churrasToUpdate.Id,
+            new PartitionKey(churrasToUpdate.Id)
+        );
+
+        return item.Resource;
+    }
+
+    public async Task<bool> RemoveAsync(string id)
+    {
+        var item = await _churras.DeleteItemAsync<Churras>(id, new PartitionKey(id));
+
+        return item.StatusCode == HttpStatusCode.NoContent;
     }
 }

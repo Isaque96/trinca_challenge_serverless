@@ -1,31 +1,35 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace Domain.Entities;
 
 public class Person
 {
-    public Person() { }
-
-    public Person(string name, bool isModerator, IEnumerable<Agenda> agendas)
+    public Person()
     {
-        Id = Guid.NewGuid();
+        Agendas = new Collection<Agenda>();
+    }
+
+    public Person(string name, bool isModerator, ICollection<Agenda> agendas)
+    {
+        Id = Guid.NewGuid().ToString();
         Name = name;
         Agendas = agendas;
         IsModerator = isModerator;
     }
 
     public Person(string name, bool isModerator)
-        : this(name, isModerator, Enumerable.Empty<Agenda>()) { }
+        : this(name, isModerator, new Collection<Agenda>()) { }
 
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [JsonProperty("id")]
+    public string Id { get; set; }
     
-    [JsonPropertyName("name")]
+    [JsonProperty("name")]
     public string Name { get; set; }
     
-    [JsonPropertyName("isModerator")]
+    [JsonProperty("isModerator")]
     public bool IsModerator { get; set; }
     
-    [JsonPropertyName("agendas")]
-    public IEnumerable<Agenda> Agendas { get; set; }
+    [JsonProperty("agendas")]
+    public ICollection<Agenda> Agendas { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace Churrascada.Extensions;
 
@@ -8,6 +9,6 @@ public static class StreamExtensions
     {
         var stringValue = await new StreamReader(stream).ReadToEndAsync();
 
-        return JsonSerializer.Deserialize<T>(stringValue);
+        return JsonConvert.DeserializeObject<T>(stringValue);
     }
 }

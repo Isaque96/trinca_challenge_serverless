@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace Domain.Entities;
 
@@ -6,26 +6,19 @@ public class Agenda
 {
     public Agenda() { }
 
-    public Agenda(string taskTitle, DateTime date, bool isBbq = false)
+    public Agenda(string taskTitle, DateTime date)
     {
-        Id = Guid.NewGuid();
+        Id = Guid.NewGuid().ToString();
         TaskTitle = taskTitle;
         Date = date;
-        IsBbq = isBbq;
     }
 
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [JsonProperty("id")]
+    public string Id { get; set; }
     
-    [JsonPropertyName("taskTitle")]
+    [JsonProperty("taskTitle")]
     public string TaskTitle { get; set; }
     
-    [JsonPropertyName("date")]
+    [JsonProperty("date")]
     public DateTime Date { get; set; }
-    
-    [JsonPropertyName("isBbq")]
-    public bool IsBbq { get; set; }
-    
-    [JsonPropertyName("churrasId")]
-    public Guid ChurrasId { get; set; }
 }
