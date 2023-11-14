@@ -8,6 +8,11 @@
 
     <ItemGroup>
       <Compile Remove="Class1.cs" />
+      <Compile Remove="Database\CosmosConn.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="7.0.13" />
     </ItemGroup>
 
 </Project>

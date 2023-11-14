@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Domain.Entities;
 
@@ -14,18 +16,20 @@ public class Agenda
         IsBbq = isBbq;
     }
 
+    [Key]
     [JsonPropertyName("id")]
+    [Column("id")]
     public Guid Id { get; set; }
     
     [JsonPropertyName("taskTitle")]
+    [Column("taskTitle")]
     public string TaskTitle { get; set; }
     
     [JsonPropertyName("date")]
+    [Column("date")]
     public DateTime Date { get; set; }
     
     [JsonPropertyName("isBbq")]
+    [Column("isBbq")]
     public bool IsBbq { get; set; }
-    
-    [JsonPropertyName("churrasId")]
-    public Guid ChurrasId { get; set; }
 }

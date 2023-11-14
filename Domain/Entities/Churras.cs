@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Domain.Entities;
 
@@ -15,18 +17,24 @@ public class Churras
         IsTrincasPaying = isTrincasPaying;
     }
 
-    [JsonPropertyName("id")] 
+    [Key]
+    [JsonPropertyName("id")]
+    [Column("id")]
     public Guid Id { get; set; }
     
     [JsonPropertyName("reason")]
+    [Column("reason")]
     public string Reason { get; set; }
     
     [JsonPropertyName("status")]
+    [Column("status")]
     public string Status { get; set; }
     
     [JsonPropertyName("date")]
+    [Column("date")]
     public DateTime Date { get; set; }
     
     [JsonPropertyName("isTrincasPaying")]
+    [Column("isTrincasPaying")]
     public bool IsTrincasPaying { get; set; }
 }
