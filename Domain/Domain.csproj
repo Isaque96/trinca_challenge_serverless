@@ -7,13 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Class1.cs" />
-      <Compile Remove="Database\Context\**" />
-      <Compile Remove="Database\Migrations\**" />
-      <Compile Remove="Extensions\**" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.36.0" />
       <PackageReference Include="Microsoft.Azure.Functions.Worker.Core" Version="1.15.0" />
     </ItemGroup>
