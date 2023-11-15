@@ -1,7 +1,9 @@
-﻿using Domain.Abstractions;
+﻿using System.Net;
+using Domain.Abstractions;
 using Domain.Database;
 using Domain.Entities;
 using Domain.Models.Responses;
+using Domain.Utils;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker.Http;
 
@@ -49,27 +51,40 @@ public class AgendaRepository : PaginationAbstraction, IAgendaRepository
         if (string.IsNullOrEmpty(entity.Id))
             entity.Id = Guid.NewGuid().ToString();
         
-        Agenda churras;
+        Agenda agenda;
         try
         {
-            churras = await _agendas.CreateItemAsync(entity, new PartitionKey(entity.Id));
+            agenda = await _agendas.CreateItemAsync(entity, new PartitionKey(entity.Id));
         }
         catch(Exception ex)
         {
             Console.WriteLine(ex);
-            churras = null!;
+            agenda = null!;
         }
 
-        return churras;
+        return agenda;
     }
 
-    public Task<Agenda> UpdateAsync(Agenda entity)
+    public async Task<Agenda> UpdateAsync(Agenda entity)
     {
-        throw new NotImplementedException();
+        var item = await _agendas.ReadItemAsync<Agenda>(entity.Id, new PartitionKey(entity.Id));
+        var agenda = item.Resource;
+
+        var agendaToUpdate = Util.UpdateLogic(entity, agenda);
+
+        item = await _agendas.ReplaceItemAsync(
+            agendaToUpdate,
+            agendaToUpdate.Id,
+            new PartitionKey(agendaToUpdate.Id)
+        );
+
+        return item.Resource;
     }
 
-    public Task<bool> RemoveAsync(string id)
+    public async Task<bool> RemoveAsync(string id)
     {
-        throw new NotImplementedException();
+        var item = await _agendas.DeleteItemAsync<Agenda>(id, new PartitionKey(id));
+
+        return item.StatusCode == HttpStatusCode.NoContent;
     }
 }
