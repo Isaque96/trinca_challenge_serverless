@@ -54,7 +54,7 @@ public class ChurrasRepository : PaginationAbstraction, IChurrasRepository
     {
         var churras = await ChurrasCreation(entity);
 
-        return churras.Churras;
+        return churras?.Churras;
     }
 
     public async Task<ChurrasWithAgenda> ChurrasCreation(Churras entity)
