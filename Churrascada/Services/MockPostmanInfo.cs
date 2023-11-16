@@ -69,9 +69,7 @@ public static class MockPostmanInfo
                 "795fc8f2-1473-4f19-b33e-ade1a42ed123"
             )
         };
-
-        var agendaList = new List<Agenda>();
-
+        
         var agendaRepository = new AgendaRepository(cosmosConn);
         var churrasRepository = new ChurrasRepository(cosmosConn, agendaRepository);
         var personRepository = new PersonRepository(cosmosConn, agendaRepository, churrasRepository);
@@ -79,10 +77,13 @@ public static class MockPostmanInfo
         foreach (var churras in churrasList)
             await churrasRepository.AddAsync(churras);
 
+        var agendas = await agendaRepository.GetAllAgendas();
         foreach (var person in personList)
-            await personRepository.AddAsync(person);
+        {
+            foreach (var agenda in agendas)
+                person.AgendasIds.Add(agenda.Id);
 
-        foreach (var agenda in agendaList)
-            await agendaRepository.AddAsync(agenda);
+            await personRepository.AddAsync(person);
+        }
     }
 }

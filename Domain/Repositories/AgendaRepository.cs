@@ -96,10 +96,25 @@ public class AgendaRepository : PaginationAbstraction, IAgendaRepository
         return item.StatusCode == HttpStatusCode.NoContent;
     }
 
-    public async Task<Agenda> GetAgendaByChurrasId(string id)
+    public async Task<IEnumerable<Agenda>> GetAllAgendas()
     {
-        var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @Id")
-            .WithParameter("@Id", id);
+        var query = new QueryDefinition("SELECT * FROM c");
+        var agendas = _agendas.GetItemQueryIterator<Agenda>(query);
+
+        List<Agenda> agenda = new();
+        while (agendas.HasMoreResults)
+        {
+            var agendasResponse = await agendas.ReadNextAsync();
+            agenda.AddRange(agendasResponse);
+        }
+
+        return agenda;
+    }
+
+    public async Task<Agenda> GetAgendaByChurrasId(string churrasId)
+    {
+        var query = new QueryDefinition("SELECT * FROM c WHERE c.churrasId = @churrasId")
+            .WithParameter("@churrasId", churrasId);
         var agendas = _agendas.GetItemQueryIterator<Agenda>(query);
 
         List<Agenda> agenda = new();
