@@ -67,18 +67,26 @@ public class AgendaRepository : PaginationAbstraction, IAgendaRepository
 
     public async Task<Agenda> UpdateAsync(Agenda entity)
     {
-        var item = await _agendas.ReadItemAsync<Agenda>(entity.Id, new PartitionKey(entity.Id));
-        var agenda = item.Resource;
+        try
+        {
+            var item = await _agendas.ReadItemAsync<Agenda>(entity.Id, new PartitionKey(entity.Id));
+            var agenda = item.Resource;
 
-        var agendaToUpdate = Util.UpdateLogic(entity, agenda);
+            var agendaToUpdate = Util.UpdateLogic(entity, agenda);
 
-        item = await _agendas.ReplaceItemAsync(
-            agendaToUpdate,
-            agendaToUpdate.Id,
-            new PartitionKey(agendaToUpdate.Id)
-        );
+            item = await _agendas.ReplaceItemAsync(
+                agendaToUpdate,
+                agendaToUpdate.Id,
+                new PartitionKey(agendaToUpdate.Id)
+            );
 
-        return item.Resource;
+            return item.Resource;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
     }
 
     public async Task<bool> RemoveAsync(string id)
@@ -86,5 +94,36 @@ public class AgendaRepository : PaginationAbstraction, IAgendaRepository
         var item = await _agendas.DeleteItemAsync<Agenda>(id, new PartitionKey(id));
 
         return item.StatusCode == HttpStatusCode.NoContent;
+    }
+
+    public async Task<Agenda> GetAgendaByChurrasId(string id)
+    {
+        var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @Id")
+            .WithParameter("@Id", id);
+        var agendas = _agendas.GetItemQueryIterator<Agenda>(query);
+
+        List<Agenda> agenda = new();
+        while (agendas.HasMoreResults)
+        {
+            var agendasResponse = await agendas.ReadNextAsync();
+            agenda.AddRange(agendasResponse);
+        }
+
+        return agenda.FirstOrDefault()!;
+    }
+
+    public async Task<IEnumerable<Agenda>> GetAllAgendasWithBbq()
+    {
+        var query = new QueryDefinition("SELECT * FROM c WHERE c.churrasId != null");
+        var agendasEntity = _agendas.GetItemQueryIterator<Agenda>(query);
+
+        List<Agenda> agendas = new();
+        while (agendasEntity.HasMoreResults)
+        {
+            var agendasResponse = await agendasEntity.ReadNextAsync();
+            agendas.AddRange(agendasResponse);
+        }
+        
+        return agendas;
     }
 }

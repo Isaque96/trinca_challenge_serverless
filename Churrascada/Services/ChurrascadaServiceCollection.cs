@@ -1,4 +1,5 @@
-﻿using Domain.Database;
+﻿using System.Configuration;
+using Domain.Database;
 using Domain.Repositories;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,5 +26,10 @@ public static class ChurrascadaServiceCollection
         ));
 
         serviceCollection.AddTransient<IChurrasRepository, ChurrasRepository>();
+        serviceCollection.AddTransient<IAgendaRepository, AgendaRepository>();
+        serviceCollection.AddTransient<IPersonRepository, PersonRepository>();
+        
+        // TODO: Remove Mocked Tests
+        MockPostmanInfo.CreatePostmanInfo().Wait();
     }
 }

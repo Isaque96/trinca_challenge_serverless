@@ -12,10 +12,12 @@ namespace Churrascada.Functions;
 public class ChurrasFunctions
 {
     private readonly IChurrasRepository _repository;
+    private readonly IPersonRepository _personRepository;
 
-    public ChurrasFunctions(IChurrasRepository repository)
+    public ChurrasFunctions(IChurrasRepository repository, IPersonRepository personRepository)
     {
         _repository = repository;
+        _personRepository = personRepository;
     }
     
     [Function("ItWillReallyHappen")]
@@ -25,7 +27,7 @@ public class ChurrasFunctions
             "get",
             Route = "churras/{id}"
         )] HttpRequestData req,
-        string id
+        string? id
     )
     {
         var churras = await _repository.GetByIdAsync(id);
@@ -75,17 +77,21 @@ public class ChurrasFunctions
     {
         var body = req.Body;
         HttpResponseData response;
+        if (!req.Headers.TryGetValues("personId", out var personIds))
+            return await HeaderIsMissing(req);
+
         if (body.Length <= 0 && req.Headers.TryGetValues("Content-Type", out var header))
             return await BodyValidation(req, header);
         
         var churrasInfo = await body.ToObjectAsync<ChurrasInfo>();
 
-        var churras = await _repository.AddAsync(churrasInfo!.CreateEntity());
+        var cwa = await _repository.ChurrasCreation(churrasInfo!.CreateEntity());
+        var acceptedInvite = _personRepository.VinculateBbq(personIds.FirstOrDefault(), cwa.Agenda);
 
-        if (churras != null!)
+        if (acceptedInvite != null!)
         {
             response = req.CreateResponse(HttpStatusCode.Created);
-            await response.WriteAsJsonAsync(churras);            
+            await response.WriteAsJsonAsync(cwa.Churras);            
         }
         else
         {
@@ -104,7 +110,7 @@ public class ChurrasFunctions
             Route = "churras/{id}/moderar"
         )]
         HttpRequestData req,
-        string id
+        string? id
     )
     {
         var body = req.Body;
@@ -143,8 +149,7 @@ public class ChurrasFunctions
     
     private static async Task<HttpResponseData> BodyValidation(HttpRequestData req, IEnumerable<string> header)
     {
-        HttpResponseData response;
-        response = req.CreateResponse(HttpStatusCode.BadRequest);
+        var response = req.CreateResponse(HttpStatusCode.BadRequest);
         response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
         var fullHeader = string.Join(";", header);
@@ -152,6 +157,19 @@ public class ChurrasFunctions
             fullHeader.ToUpper().Contains("JSON")
                 ? new FailureMessage("no-code", "You should send a body with information!")
                 : new FailureMessage("no-code", "You should send a JSON body!")
+        );
+
+        return response;
+    }
+    
+    private static async Task<HttpResponseData> HeaderIsMissing(HttpRequestData req)
+    {
+        var response = req.CreateResponse(HttpStatusCode.BadRequest);
+        await response.WriteAsJsonAsync(
+            new FailureMessage(
+                "no-code",
+                "The request Header 'personId' is required!"
+            )
         );
 
         return response;

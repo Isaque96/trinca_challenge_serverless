@@ -7,19 +7,19 @@ public class Person
 {
     public Person()
     {
-        Agendas = new Collection<Agenda>();
+        AgendasIds = new Collection<string>();
     }
 
-    public Person(string name, bool isModerator, ICollection<Agenda> agendas)
+    public Person(string name, bool isModerator, ICollection<string> agendasIds, string? id = null)
     {
-        Id = Guid.NewGuid().ToString();
+        Id = id ?? Guid.NewGuid().ToString();
         Name = name;
-        Agendas = agendas;
+        AgendasIds = agendasIds;
         IsModerator = isModerator;
     }
 
-    public Person(string name, bool isModerator)
-        : this(name, isModerator, new Collection<Agenda>()) { }
+    public Person(string name, bool isModerator, string? id = null)
+        : this(name, isModerator, new Collection<string>(), id) { }
 
     [JsonProperty("id")]
     public string Id { get; set; }
@@ -31,5 +31,5 @@ public class Person
     public bool IsModerator { get; set; }
     
     [JsonProperty("agendas")]
-    public ICollection<Agenda> Agendas { get; set; }
+    public ICollection<string> AgendasIds { get; set; }
 }

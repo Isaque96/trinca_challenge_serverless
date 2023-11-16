@@ -7,15 +7,24 @@ public class Churras
 {
     public Churras() { }
     
-    public Churras(string reason, string status, DateTime date, bool isTrincasPaying)
+    public Churras(string reason, string status, DateTime date, bool isTrincasPaying, string? id = null)
     {
-        Id = Guid.NewGuid().ToString();
+        Id = id ?? Guid.NewGuid().ToString();
         Reason = reason;
         Status = status;
         Date = date;
         IsTrincasPaying = isTrincasPaying;
     }
 
+    public Churras(string reason, ChurrasStatus status, DateTime date, bool isTrincasPaying, string? id = null)
+    {
+        Id = id ?? Guid.NewGuid().ToString();
+        Reason = reason;
+        Status = status.ToString();
+        Date = date;
+        IsTrincasPaying = isTrincasPaying;
+    }
+    
     [JsonProperty("id")]
     public string Id { get; set; }
     
